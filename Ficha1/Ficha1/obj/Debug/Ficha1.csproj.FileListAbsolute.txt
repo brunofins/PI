@@ -1,0 +1,8 @@
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\bin\Debug\Ficha1.exe.config
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\obj\Debug\Ficha1.csprojResolveAssemblyReference.cache
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\bin\Debug\Ficha1.exe
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\bin\Debug\Ficha1.pdb
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\obj\Debug\Ficha1.exe
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\obj\Debug\Ficha1.pdb
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\bin\Debug\RestSharp.dll
+D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\bin\Debug\RestSharp.xml
