@@ -9,5 +9,6 @@ namespace Ficha1
     {
         public String name { set; get; }
         public String location { set; get; }
+        public String message { set; get; }
     }
 }

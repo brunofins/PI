@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collaborator.cs" />
     <Compile Include="Repos.cs" />
     <Compile Include="LanguageOccurrences.cs" />
     <Compile Include="Organization.cs" />

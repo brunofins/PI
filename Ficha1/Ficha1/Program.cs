@@ -15,13 +15,15 @@ namespace Ficha1
         private static int MaxOcc;
         private static int occTotal =0;
 
-        private readonly String apiLink = "https://api.github.com";
-        private readonly String repos = "/repos";
-        private readonly String orgs = "/orgs";
+        private static readonly String apiLink = "https://api.github.com";
+        private static readonly String repos = "/repos";
+        private static readonly String orgsLink = "/orgs";
 
         private static RestClient client;
 
         private static RestRequest request;
+
+        private static HttpBasicAuthenticator auth;
 
         public static void Main(string[] args)
         {
@@ -31,16 +33,19 @@ namespace Ficha1
 
             if (args.Length != 1)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException("Invalid arguments number");
             }
 
-            client = new RestClient();
-           
-             IRestResponse<List<Organization>> responseOrg = GetOrganization();
-             
-             IRestResponse<List<Repos>> responseRepos = GetRepos();
+            auth = new HttpBasicAuthenticator("brunofins", "terceira6");
 
-             IRestResponse<List<Repos>> responseCollaborators = GetReposcollaborators();
+            client = new RestClient();
+
+            if (!GetOrganization(args[0]))
+                throw new ArgumentException("Invalid Organization name");
+
+            //IRestResponse<List<Repos>> responseRepos = GetRepos();
+
+            //IRestResponse<List<Repos>> responseCollaborators = GetReposcollaborators();
 
             /* HEADER
 
@@ -94,13 +99,24 @@ namespace Ficha1
             return null;
         }
 
-        private static IRestResponse<List<Organization>> GetOrganization()
+        private static bool GetOrganization(String orgName)
         {
 
-            client.BaseUrl = "https://api.github.com";
+            client.BaseUrl = apiLink + orgsLink + "/" + orgName;
             client.Authenticator = new HttpBasicAuthenticator("brunofins", "terceira6");
 
-            return null;
+            request = new RestRequest();
+            
+            IRestResponse<Organization> response = client.Execute<Organization>(request);
+ 
+            org = response.Data;
+            if (org.message != null)
+                return false;
+
+            if (org.name == null)
+                org.name = orgName;
+
+            return true;
         }
 
         private static void HistogramPrint()
@@ -121,7 +137,12 @@ namespace Ficha1
 
         private static void PrintHeader()
         {
-          Console.WriteLine(org.name +" (" + org.location + ")");
+            String header = org.name;
+           
+          if(org.location != null)
+            header += " (" + org.location + ")";
+            
+          Console.WriteLine(header);
           Console.WriteLine("-------------------------------------------------------------------");
         }
 
