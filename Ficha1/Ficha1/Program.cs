@@ -19,11 +19,13 @@ namespace Ficha1
         private static readonly String repos = "/repos";
         private static readonly String orgsLink = "/orgs";
 
+        private static readonly String authName = "Auth";
+        private static readonly String authToken = "token 944db21170c27a344cf5061508aa66d1250b8da7";
+
         private static RestClient client;
 
         private static RestRequest request;
 
-        private static HttpBasicAuthenticator auth;
 
         public static void Main(string[] args)
         {
@@ -36,12 +38,13 @@ namespace Ficha1
                 throw new ArgumentOutOfRangeException("Invalid arguments number");
             }
 
-            auth = new HttpBasicAuthenticator("brunofins", "terceira6");
-
             client = new RestClient();
+            client.AddDefaultHeader(authName, authToken);
 
             if (!GetOrganization(args[0]))
                 throw new ArgumentException("Invalid Organization name");
+
+            PrintHeader();
 
             //IRestResponse<List<Repos>> responseRepos = GetRepos();
 
@@ -59,7 +62,7 @@ namespace Ficha1
             String name = "GitHub", local = "San Francisco, CA";
             org = new Organization(name, local);
             */
-            HistogramPrint();
+            //HistogramPrint();
         }
 
         private static IRestResponse<List<Repos>> GetReposcollaborators()
