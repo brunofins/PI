@@ -6,3 +6,11 @@ D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\obj\Debug\Ficha1.exe
 D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\obj\Debug\Ficha1.pdb
 D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\bin\Debug\RestSharp.dll
 D:\Work ISEL\repositorios\PI\Ficha1\Ficha1\bin\Debug\RestSharp.xml
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\bin\Debug\Ficha1.exe.config
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\obj\Debug\Ficha1.exe
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\obj\Debug\Ficha1.pdb
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\bin\Debug\Ficha1.exe
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\bin\Debug\Ficha1.pdb
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\bin\Debug\RestSharp.dll
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\bin\Debug\RestSharp.xml
+C:\Users\Dani Abreu\Desktop\Programação na Internet Ficha 1\PI\Ficha1\Ficha1\obj\Debug\Ficha1.csprojResolveAssemblyReference.cache

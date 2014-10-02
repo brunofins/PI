@@ -25,12 +25,17 @@ namespace Ficha1
             client.Authenticator = new HttpBasicAuthenticator("brunofins", "terceira6");
 
             var request = new RestRequest();
-            //request.Resource = "/orgs/octokit/repos";
-            request.Resource = "/orgs/flatiron/repos";
-
+            request.Resource = "/orgs/octokit/repos";
+            //request.Resource = "/orgs/flatiron/repos";
+            //request.Resource = "/orgs/github/repos";
+            
             IRestResponse<List<Repos>> response = client.Execute<List<Repos>>(request);
 
-
+            String linkValue;
+            foreach(var head in response.Headers)//é assim que vamos buscar os headers, onde está o link para obtermos os outros repositorios
+                if(head.Name.Equals("Link"))
+                   linkValue = (String)head.Value;
+            
             Console.WriteLine(response.Data.Count);
             List<Repos> responseData = response.Data;
 
@@ -103,7 +108,7 @@ namespace Ficha1
 
         private static void PrintHeader()
         {
-          Console.WriteLine(org.name +" (" + org.local + ")");
+          Console.WriteLine(org.name +" (" + org.location + ")");
           Console.WriteLine("-------------------------------------------------------------------");
         }
 

@@ -8,15 +8,6 @@ namespace Ficha1
     public class Organization
     {
         public String name { set; get; }
-        public String local { set; get; }
-
-
-
-
-        public Organization(string name, string local)
-        {
-            this.name = name;
-            this.local = local;
-        }
+        public String location { set; get; }
     }
 }

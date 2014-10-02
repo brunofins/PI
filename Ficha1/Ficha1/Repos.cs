@@ -8,7 +8,7 @@ namespace Ficha1
 {
     public class Repos
     {
-        //public String name { set; get; }
         public String language { set; get; }
+        public String collaborators_url {set; get;}
     }
 }
