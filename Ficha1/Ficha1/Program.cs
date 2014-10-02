@@ -10,10 +10,14 @@ namespace Ficha1
     public class Program
     {
         private static Organization org;
-        private static Dictionary<String, int> occs;
-        private static int MaxName;
-        private static int MaxOcc;
-        private static int occTotal =0;
+        private static Dictionary<String, int> languageOcurs = new Dictionary<String, int>();
+        private static Dictionary<String, int> collaboratorOcurs = new Dictionary<String, int>();
+        private static int colMaxName;
+        private static int colMaxOcc;
+        private static int colOccTotal = 0;
+        private static int lanMaxName;
+        private static int lanMaxOcc;
+        private static int lanOccTotal = 0;
 
         private static readonly String apiLink = "https://api.github.com";
         private static readonly String repos = "/repos";
@@ -43,9 +47,9 @@ namespace Ficha1
             if (!GetOrganization(args[0]))
                 throw new ArgumentException("Invalid Organization name");
 
-            //IRestResponse<List<Repos>> responseRepos = GetRepos();
+            GetRepos(args[0]);
 
-            //IRestResponse<List<Repos>> responseCollaborators = GetReposcollaborators();
+            GetReposcollaborators(args[0]);
 
             /* HEADER
 
@@ -62,19 +66,57 @@ namespace Ficha1
             HistogramPrint();
         }
 
-        private static IRestResponse<List<Repos>> GetReposcollaborators()
+        private static void GetReposcollaborators(String orgName)
         {
-            throw new NotImplementedException();
+            IRestResponse<List<Repos>> response = null;
+            List<Repos> responseData;
+            String link = apiLink + orgsLink + "/" + orgName + repos;
+            getResponse(link, response, out responseData);
+
+            String colLink;
+            foreach (Repos r in responseData)
+            {
+            colLink = r.collaborators_url;
+
+            colLink = colLink.Remove(colLink.IndexOf('{'));
+
+            IRestResponse<List<Collaborator>> colResponse = null;
+            List <Collaborator> colData;
+            getResponse<Collaborator>(colLink, colResponse, out colData);
+
+            String loginCol;
+            colOccTotal = colData.Count;
+            foreach (Collaborator c in colData)
+            {
+                if (c.login == null)
+                    loginCol = "";
+                else
+                    loginCol = c.login;
+
+                if (loginCol.Length > colMaxName)
+                    colMaxName = loginCol.Length;
+                
+                if (collaboratorOcurs.ContainsKey(loginCol))
+                    collaboratorOcurs[loginCol]++;
+                else
+                    collaboratorOcurs.Add(loginCol, 1);
+                
+                if (collaboratorOcurs[loginCol] > colMaxOcc)
+                    colMaxOcc = collaboratorOcurs[loginCol];
+            }
+            }
+
         }
 
-        private static IRestResponse<List<Repos>> GetRepos()
+        private static void GetRepos(String orgName)
         {
-            RestRequest request = new RestRequest();
-            IRestResponse<List<Repos>> response = client.Execute<List<Repos>>(request);
-            List<Repos> responseData = response.Data;
+            IRestResponse<List<Repos>> response = null;
+            List<Repos> responseData;
+            String link = apiLink + orgsLink + "/" + orgName + repos;
+            getResponse<Repos>(link, response, out responseData);
 
             String lName;
-            occs = new Dictionary<string, int>();
+            lanOccTotal = responseData.Count;
             foreach (Repos r in responseData)
             {
                 if (r.language == null)
@@ -83,20 +125,25 @@ namespace Ficha1
                     lName = r.language;
 
                 //Procurar o maior nome
-                if (lName.Length > MaxName)
-                    MaxName = lName.Length;
+                if (lName.Length > colMaxName)
+                    lanMaxName = lName.Length;
                 //Verificar se ja apareceu a linguagem se sim incrementar n. de ocorrencias caso contrario colocar no dic
-                if (occs.ContainsKey(lName))
-                    occs[lName]++;
+                if (languageOcurs.ContainsKey(lName))
+                    languageOcurs[lName]++;
                 else
-                    occs.Add(lName, 1);
+                    languageOcurs.Add(lName, 1);
                 //Procurar maior numero de ocorrencias
-                if (occs[lName] > MaxOcc)
-                    MaxOcc = occs[lName];
-                occTotal++;
+                if (languageOcurs[lName] > lanMaxOcc)
+                    lanMaxOcc = languageOcurs[lName];
             }
+        }
 
-            return null;
+        private static void getResponse<T>(String link, IRestResponse<List<T>> response, out List<T> responseData)
+        {
+            client.BaseUrl = link;
+            RestRequest request = new RestRequest();
+            response = client.Execute<List<T>>(request);
+            responseData = response.Data;
         }
 
         private static bool GetOrganization(String orgName)
@@ -122,17 +169,29 @@ namespace Ficha1
         private static void HistogramPrint()
         {
             PrintHeader();
-            foreach(KeyValuePair<String,int> kvp in occs ){
-                int nOcc = kvp.Value;
+            PrintTable(languageOcurs, lanOccTotal, lanMaxOcc, lanMaxOcc);
+            Console.WriteLine();
+            if(collaboratorOcurs.Count != 0){
+            Console.WriteLine("*****************************************************************");
+            Console.WriteLine();
+            Console.WriteLine("Collaborators");
+            Console.WriteLine("-------------------------------------------------------------------");
+            PrintTable(collaboratorOcurs, colOccTotal, colMaxName, colMaxOcc); 
+            }
+            
+
+        }
+
+        private static void PrintTable(Dictionary<String, int> dic, int occTotal, int maxName, int maxOcc)
+        {
+            foreach(KeyValuePair<String,int> kvpLanguage in dic ){
+                int nOcc = kvpLanguage.Value;
                 int perc = (int)(((double)nOcc / occTotal) *100);
                 String occ = new String('*', nOcc);
-                Console.WriteLine(kvp.Key.PadRight(MaxName, ' ') + 
-                                  ": " + occ.PadRight(MaxOcc + 5, ' ') + "( " +
+                Console.WriteLine(kvpLanguage.Key.PadRight(maxName, ' ') + 
+                                  ": " + occ.PadRight(maxOcc + 5, ' ') + "( " +
                                   perc + "%, " + nOcc + " repos)");
-                
-
             }
-
         }
 
         private static void PrintHeader()
