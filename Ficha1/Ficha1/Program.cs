@@ -187,10 +187,11 @@ namespace Ficha1
             foreach(KeyValuePair<String,int> kvpLanguage in dic ){
                 int nOcc = kvpLanguage.Value;
                 int perc = (int)(((double)nOcc / occTotal) *100);
+                
                 String occ = new String('*', nOcc);
                 Console.WriteLine(kvpLanguage.Key.PadRight(maxName, ' ') + 
                                   ": " + occ.PadRight(maxOcc + 5, ' ') + "( " +
-                                  perc + "%, " + nOcc + " repos)");
+                                  perc.ToString().PadLeft(3, ' ') + "%, " + nOcc + " repos)");
             }
         }
 
