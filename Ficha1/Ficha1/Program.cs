@@ -29,6 +29,11 @@ namespace Ficha1
 
         private static HttpBasicAuthenticator auth;
 
+        private static IRestResponse<List<>> response;
+        private static List<Repos> responseData;
+
+        private static readonly String nextLink = "rel=\"next\"";
+
         public static void Main(string[] args)
         {
             //request.Resource = "/orgs/octokit/repos";
@@ -47,29 +52,37 @@ namespace Ficha1
             if (!GetOrganization(args[0]))
                 throw new ArgumentException("Invalid Organization name");
 
+
+            
+            String linkValue = null;
+            do{
             GetRepos(args[0]);
 
-            GetReposcollaborators(args[0]);
-
-            /* HEADER
-
-            String linkValue;
+            //HEADER
             foreach(var head in response.Headers)//é assim que vamos buscar os headers, onde está o link para obtermos os outros repositorios
-                if(head.Name.Equals("Link"))
+                if(head.Name.Equals("Link")){
                    linkValue = (String)head.Value;
-            
-            Console.WriteLine(response.Data.Count);
+                   break;
+                }
 
-            String name = "GitHub", local = "San Francisco, CA";
-            org = new Organization(name, local);
-            */
+            if (linkValue != null && linkValue.Contains(nextLink))
+                linkValue = linkValue.Substring(0, linkValue.IndexOf(nextLink));
+
+
+            }while(linkValue != null);
+
+            //String name = "GitHub", local = "San Francisco, CA";
+            //org = new Organization(name, local);
+
+            GetReposcollaborators(args[0]);
+            
             HistogramPrint();
         }
 
         private static void GetReposcollaborators(String orgName)
         {
-            IRestResponse<List<Repos>> response = null;
-            List<Repos> responseData;
+            response = null;
+            responseData = null;
             String link = apiLink + orgsLink + "/" + orgName + repos;
             getResponse(link, response, out responseData);
 
@@ -110,8 +123,8 @@ namespace Ficha1
 
         private static void GetRepos(String orgName)
         {
-            IRestResponse<List<Repos>> response = null;
-            List<Repos> responseData;
+            response = null;
+            responseData = null;
             String link = apiLink + orgsLink + "/" + orgName + repos;
             getResponse<Repos>(link, response, out responseData);
 
