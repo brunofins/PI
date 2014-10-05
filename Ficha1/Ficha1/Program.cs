@@ -31,10 +31,6 @@ namespace Ficha1
 
         public static void Main(string[] args)
         {
-            //request.Resource = "/orgs/octokit/repos";
-            //request.Resource = "/orgs/flatiron/repos";
-            //request.Resource = "/orgs/github/repos";
-
             if (args.Length != 1)
             {
                 throw new ArgumentOutOfRangeException("Invalid arguments number");
@@ -43,80 +39,76 @@ namespace Ficha1
             auth = new HttpBasicAuthenticator("brunofins", "terceira6");
 
             client = new RestClient();
+            client.Authenticator = auth;
 
             if (!GetOrganization(args[0]))
                 throw new ArgumentException("Invalid Organization name");
 
-            GetRepos(args[0]);
+            IRestResponse<List<Repos>> response = null;
+            List<Repos> responseData;
+            String curUri = apiLink + orgsLink + "/" + args[0] + repos;
 
-            GetReposcollaborators(args[0]);
+            while (curUri != null) { 
 
-            /* HEADER
-
-            String linkValue;
-            foreach(var head in response.Headers)//é assim que vamos buscar os headers, onde está o link para obtermos os outros repositorios
-                if(head.Name.Equals("Link"))
-                   linkValue = (String)head.Value;
+                GetResponse<Repos>(curUri, out response, out responseData);
             
-            Console.WriteLine(response.Data.Count);
+                GetRepos(responseData);
 
-            String name = "GitHub", local = "San Francisco, CA";
-            org = new Organization(name, local);
-            */
+                GetReposcollaborators(responseData);
+
+                curUri = GetUriFromLink(response);
+
+            }
+            
             HistogramPrint();
         }
 
-        private static void GetReposcollaborators(String orgName)
+        private static void GetReposcollaborators(List<Repos> responseData)
         {
-            IRestResponse<List<Repos>> response = null;
-            List<Repos> responseData;
-            String link = apiLink + orgsLink + "/" + orgName + repos;
-            getResponse(link, response, out responseData);
-
             String colLink;
             foreach (Repos r in responseData)
             {
-            colLink = r.collaborators_url;
+                colLink = r.collaborators_url;
 
-            colLink = colLink.Remove(colLink.IndexOf('{'));
+                colLink = colLink.Remove(colLink.IndexOf('{'));
 
-            IRestResponse<List<Collaborator>> colResponse = null;
-            List <Collaborator> colData;
-            getResponse<Collaborator>(colLink, colResponse, out colData);
+                IRestResponse<List<Collaborator>> colResponse = null;
+                List<Collaborator> colData;
 
-            String loginCol;
-            colOccTotal = colData.Count;
-            foreach (Collaborator c in colData)
-            {
-                if (c.login == null)
-                    loginCol = "";
-                else
-                    loginCol = c.login;
+                String loginCol;
+                while (colLink != null)
+                {
+                    GetResponse<Collaborator>(colLink, out colResponse, out colData);
 
-                if (loginCol.Length > colMaxName)
-                    colMaxName = loginCol.Length;
-                
-                if (collaboratorOcurs.ContainsKey(loginCol))
-                    collaboratorOcurs[loginCol]++;
-                else
-                    collaboratorOcurs.Add(loginCol, 1);
-                
-                if (collaboratorOcurs[loginCol] > colMaxOcc)
-                    colMaxOcc = collaboratorOcurs[loginCol];
+                    
+                    colOccTotal += colData.Count;
+                    foreach (Collaborator c in colData)
+                    {
+                        if (c.login == null)
+                            loginCol = "";
+                        else
+                            loginCol = c.login;
+
+                        if (loginCol.Length > colMaxName)
+                            colMaxName = loginCol.Length;
+
+                        if (collaboratorOcurs.ContainsKey(loginCol))
+                            collaboratorOcurs[loginCol]++;
+                        else
+                            collaboratorOcurs.Add(loginCol, 1);
+
+                        if (collaboratorOcurs[loginCol] > colMaxOcc)
+                            colMaxOcc = collaboratorOcurs[loginCol];
+                    }
+                    colLink = GetUriFromLink(colResponse);
+                }
             }
-            }
-
         }
 
-        private static void GetRepos(String orgName)
+        private static void GetRepos(List<Repos> responseData)
         {
-            IRestResponse<List<Repos>> response = null;
-            List<Repos> responseData;
-            String link = apiLink + orgsLink + "/" + orgName + repos;
-            getResponse<Repos>(link, response, out responseData);
-
             String lName;
-            lanOccTotal = responseData.Count;
+            lanOccTotal += responseData.Count;
             foreach (Repos r in responseData)
             {
                 if (r.language == null)
@@ -138,7 +130,7 @@ namespace Ficha1
             }
         }
 
-        private static void getResponse<T>(String link, IRestResponse<List<T>> response, out List<T> responseData)
+        private static void GetResponse<T>(String link, out IRestResponse<List<T>> response, out List<T> responseData)
         {
             client.BaseUrl = link;
             RestRequest request = new RestRequest();
@@ -146,12 +138,18 @@ namespace Ficha1
             responseData = response.Data;
         }
 
+        private static String GetUriFromLink<T>(IRestResponse<T> response)
+        {
+            foreach (var head in response.Headers)
+                if (head.Name.Equals("Link") && ((String)head.Value).Contains("rel=\"next\""))
+                    return ((String)head.Value).Substring(1, ((String)head.Value).IndexOf("rel=\"next\"") - 4);
+            return null;
+        }
+
         private static bool GetOrganization(String orgName)
         {
 
             client.BaseUrl = apiLink + orgsLink + "/" + orgName;
-            client.Authenticator = new HttpBasicAuthenticator("brunofins", "terceira6");
-
             request = new RestRequest();
             
             IRestResponse<Organization> response = client.Execute<Organization>(request);
