@@ -14,7 +14,6 @@ namespace Ficha1
         private static Dictionary<String, int> collaboratorOcurs = new Dictionary<String, int>();
         private static int colMaxName;
         private static int colMaxOcc;
-        private static int colOccTotal = 0;
         private static int lanMaxName;
         private static int lanMaxOcc;
         private static int lanOccTotal = 0;
@@ -25,10 +24,6 @@ namespace Ficha1
 
         private static RestClient client;
 
-        private static RestRequest request;
-
-        private static HttpBasicAuthenticator auth;
-
         public static void Main(string[] args)
         {
             if (args.Length != 1)
@@ -36,10 +31,8 @@ namespace Ficha1
                 throw new ArgumentOutOfRangeException("Invalid arguments number");
             }
 
-            auth = new HttpBasicAuthenticator("brunofins", "terceira6");
 
             client = new RestClient();
-            client.Authenticator = auth;
 
             if (!GetOrganization(args[0]))
                 throw new ArgumentException("Invalid Organization name");
@@ -80,8 +73,6 @@ namespace Ficha1
                 {
                     GetResponse<Collaborator>(colLink, out colResponse, out colData);
 
-                    
-                    colOccTotal += colData.Count;
                     foreach (Collaborator c in colData)
                     {
                         if (c.login == null)
@@ -134,6 +125,7 @@ namespace Ficha1
         {
             client.BaseUrl = link;
             RestRequest request = new RestRequest();
+            request.AddHeader("Authorization", "token 4f3396d6e9cc5df452c535597bad40f28c6d8ab7");
             response = client.Execute<List<T>>(request);
             responseData = response.Data;
         }
@@ -150,7 +142,8 @@ namespace Ficha1
         {
 
             client.BaseUrl = apiLink + orgsLink + "/" + orgName;
-            request = new RestRequest();
+            RestRequest request = new RestRequest();
+            request.AddHeader("Authorization", "token 4f3396d6e9cc5df452c535597bad40f28c6d8ab7");
             
             IRestResponse<Organization> response = client.Execute<Organization>(request);
  
@@ -170,11 +163,11 @@ namespace Ficha1
             PrintTable(languageOcurs, lanOccTotal, lanMaxOcc, lanMaxOcc);
             Console.WriteLine();
             if(collaboratorOcurs.Count != 0){
-            Console.WriteLine("*****************************************************************");
+            Console.WriteLine("-------------------------------------------------------------------------------------------------------------------------------------------");
             Console.WriteLine();
             Console.WriteLine("Collaborators");
-            Console.WriteLine("-------------------------------------------------------------------");
-            PrintTable(collaboratorOcurs, colOccTotal, colMaxName, colMaxOcc); 
+            Console.WriteLine("-------------------------------------------------------------------------------------------------------------------------------------------");
+            PrintTable(collaboratorOcurs, lanOccTotal, colMaxName, colMaxOcc); 
             }
             
 
@@ -184,8 +177,8 @@ namespace Ficha1
         {
             foreach(KeyValuePair<String,int> kvpLanguage in dic ){
                 int nOcc = kvpLanguage.Value;
-                int perc = (int)(((double)nOcc / occTotal) *100);
-                String occ = new String('*', nOcc);
+                double perc = Math.Round((((double)nOcc / occTotal) *100),1);
+                String occ = new String('*', (int)perc);
                 Console.WriteLine(kvpLanguage.Key.PadRight(maxName, ' ') + 
                                   ": " + occ.PadRight(maxOcc + 5, ' ') + "( " +
                                   perc + "%, " + nOcc + " repos)");
@@ -202,7 +195,5 @@ namespace Ficha1
           Console.WriteLine(header);
           Console.WriteLine("-------------------------------------------------------------------");
         }
-
-    
     }
 }
